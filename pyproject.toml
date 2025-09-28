@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flask-selfheal"
+version = "1.0.0"
+description = "Self-healing URLs for Flask applications with intelligent resolvers"
+authors = [{ name = "Dominic H.", email = "dom@dominic.sk" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["flask", "url", "routing", "self-healing", "fuzzy-matching", "web"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Framework :: Flask",
+    "Natural Language :: English",
+]
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.1",
+    "flask-sqlalchemy>=3.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/GovernmentPlates/flask-selfheal"
+Repository = "https://github.com/GovernmentPlates/flask-selfheal.git"
+Issues = "https://github.com/GovernmentPlates/flask-selfheal/issues"
+Documentation = "https://github.com/GovernmentPlates/flask-selfheal#readme"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "examples/",
+    "tests/",
+    ".pre-commit-config.yaml",
+    "uv.lock",
+    "src/**/__pycache__/",
+    "src/**/*.egg-info/",
+]
+
+[tool.hatch.build.targets.wheel]
+# The wheel already only includes the package source by default
+# but you can be explicit if needed:
+# only-include = ["src"]
+
+[tool.ruff]
+include = ["src/flask_selfheal/**/*.py", "examples/**/*.py", "tests/**/*.py"]
+
