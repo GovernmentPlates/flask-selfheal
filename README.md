@@ -49,8 +49,8 @@ if __name__ == "__main__":
 ```
 
 ```
-https://example.com/hme  --> Redirects to /home
-https://example.com/abot --> Redirects to /about
+https://example.com/hme    --> Redirects to /home
+https://example.com/abot   --> Redirects to /about
 https://example.com/contat --> Redirects to /contact
 ```
 
@@ -83,7 +83,7 @@ resolvers = [
     )
 ]
 
-SelfHeal(app, resolvers=resolvers, redirect_pattern="/new-path/{slug}")
+SelfHeal(app, resolvers=resolvers)
 
 if __name__ == "__main__":
     app.run(debug=True)
@@ -125,12 +125,14 @@ def article_detail(slug):
     return f"Article: {article.title}"
 
 # Configure the DatabaseResolver
-db_resolver = DatabaseResolver(
-    Articles,
-    slug_field='slug',
-)
+db_resolver = [
+    DatabaseResolver(
+        Articles,
+        slug_field='slug',
+    )
+]
 
-SelfHeal(app, resolvers=[db_resolver], redirect_pattern="/articles/{slug}")
+SelfHeal(app, resolvers=db_resolver, redirect_pattern="/articles/{slug}")
 
 if __name__ == "__main__":
     app.run(debug=True)
