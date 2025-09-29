@@ -2,6 +2,9 @@
 
 Automatically fix broken URLs in your Flask app using intelligent resolvers.
 
+![PyPI - Version](https://img.shields.io/pypi/v/flask-selfheal)
+![PyPI - License](https://img.shields.io/pypi/l/flask-selfheal)
+
 ## Features
 - **Multiple Matching Strategies**: Choose from 1:1 exact matching, fuzzy matching, and even hybrid database-backed approaches to find the best matching URL.
 - **Configurable**: Fine-tune matching strategies, thresholds, and normalization rules to suit your needs.
