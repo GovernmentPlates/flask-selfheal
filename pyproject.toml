@@ -33,6 +33,14 @@ Repository = "https://github.com/GovernmentPlates/flask-selfheal.git"
 Issues = "https://github.com/GovernmentPlates/flask-selfheal/issues"
 Documentation = "https://github.com/GovernmentPlates/flask-selfheal#readme"
 
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov>=7.0.0",
+    "ruff",
+    "ty>=0.0.1a21",
+]
+
 [tool.hatch.build.targets.sdist]
 exclude = [
     "examples/",
