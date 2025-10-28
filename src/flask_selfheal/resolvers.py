@@ -1,22 +1,25 @@
 from difflib import get_close_matches
+from sqlalchemy import or_
 import re
 
 
 class BaseResolver:
     """Base class for all resolvers"""
+
     def resolve(self, path: str) -> str | None:
         raise NotImplementedError
 
 
 class AliasMappingResolver(BaseResolver):
     """Basic 1:1 alias mapping resolver
-    
+
     Resolves old slugs to new slugs based on a provided mapping. This is
     useful for handling renamed or moved resources where the old slug should
     redirect to the new slug.
 
     :param alias_map: Dict mapping old_slug -> new_slug
     """
+
     def __init__(self, alias_map: dict[str, str]):
         self.alias_map = alias_map
 
@@ -33,6 +36,7 @@ class FuzzyMappingResolver(BaseResolver):
     :param candidates: List of valid slugs or routes
     :param fuzzy_cutoff: Similarity threshold (0 to 1) for a match to be considered valid
     """
+
     def __init__(self, candidates: list[str], fuzzy_cutoff=0.6):
         self.candidates = candidates
         self.fuzzy_cutoff = fuzzy_cutoff
@@ -68,6 +72,7 @@ class DatabaseResolver(BaseResolver):
     :param min_word_length: minimum length for words to be considered in matching
     :param custom_normalizers: dict of custom character normalizations
     """
+
     def __init__(
         self,
         model,
@@ -101,29 +106,34 @@ class DatabaseResolver(BaseResolver):
         if exact_match:
             return exact_match
 
-        # Then try LIKE patterns for common variations (faster than fuzzy)
-        like_patterns = [f"%{path}%", f"{path}%", f"%{path}"]
-        for pattern in like_patterns:
-            like_match = (
-                session.query(slug_column).filter(slug_column.like(pattern)).first()
-            )
-            if like_match:
-                return like_match[0]
+        # Try contains match (covers startswith and endswith cases)
+        contains_match = (
+            session.query(slug_column)
+            .filter(slug_column.contains(path, autoescape=True))
+            .first()
+        )
+        if contains_match:
+            return contains_match[0]
 
         # Try normalized version for common typos
         normalized_path = self._normalize_path(path)
         if normalized_path != path:
-            for pattern in [
-                normalized_path,
-                f"%{normalized_path}%",
-                f"{normalized_path}%",
-                f"%{normalized_path}",
-            ]:
-                norm_match = (
-                    session.query(slug_column).filter(slug_column.like(pattern)).first()
-                )
-                if norm_match:
-                    return norm_match[0]
+            # Try exact match first
+            exact_norm_match = (
+                session.query(slug_column)
+                .filter(slug_column == normalized_path)
+                .first()
+            )
+            if exact_norm_match:
+                return exact_norm_match[0]
+
+            contains_norm_match = (
+                session.query(slug_column)
+                .filter(slug_column.contains(normalized_path, autoescape=True))
+                .first()
+            )
+            if contains_norm_match:
+                return contains_norm_match[0]
 
         # Try word-based matching
         if self.enable_word_matching:
@@ -137,7 +147,7 @@ class DatabaseResolver(BaseResolver):
             if partial_match:
                 return partial_match
 
-        # Finally fall back to fuzzy matching for typos (slower but comprehensive)
+        # Finally, fall back to fuzzy matching for typos (slower but comprehensive)
         if self.use_fuzzy:
             slugs = [row[0] for row in session.query(slug_column).all()]
             close = get_close_matches(path, slugs, n=1, cutoff=self.fuzzy_cutoff)
@@ -159,8 +169,9 @@ class DatabaseResolver(BaseResolver):
             "qu": "kw",
         }
 
-        # Add custom normalizations
-        normalizations.update(self.custom_normalizers)
+        # Override with custom normalizations if provided
+        if self.custom_normalizers:
+            normalizations = self.custom_normalizers
 
         normalized = path.lower()
         for typo, correct in normalizations.items():
@@ -177,28 +188,21 @@ class DatabaseResolver(BaseResolver):
         if not significant_words:
             return None
 
-        # Try matching longest words first
-        for word in sorted(significant_words, key=len, reverse=True):
-            word_match = (
-                session.query(slug_column).filter(slug_column.like(f"%{word}%")).first()
-            )
-            if word_match:
-                return word_match[0]
+        patterns = []
 
-        # Try combinations of words
+        for word in significant_words:
+            patterns.append(slug_column.contains(word, autoescape=True))
+
+        # Add word combinations (max 2 words)
         if len(significant_words) > 1:
             for i in range(len(significant_words)):
-                for j in range(
-                    i + 1, min(i + 3, len(significant_words) + 1)
-                ):  # Max 2 word combos
+                for j in range(i + 1, min(i + 3, len(significant_words) + 1)):
                     combo = "-".join(significant_words[i:j])
-                    combo_match = (
-                        session.query(slug_column)
-                        .filter(slug_column.like(f"%{combo}%"))
-                        .first()
-                    )
-                    if combo_match:
-                        return combo_match[0]
+                    patterns.append(slug_column.contains(combo, autoescape=True))
+
+        word_match = session.query(slug_column).filter(or_(*patterns)).first()
+        if word_match:
+            return word_match[0]
 
         return None
 
@@ -217,7 +221,7 @@ class DatabaseResolver(BaseResolver):
                 if len(substring) >= 4:  # Only try meaningful substrings
                     partial_match = (
                         session.query(slug_column)
-                        .filter(slug_column.like(f"%{substring}%"))
+                        .filter(slug_column.contains(substring, autoescape=True))
                         .first()
                     )
                     if partial_match:
@@ -234,6 +238,7 @@ class FlaskRoutesResolver(BaseResolver):
 
     :param fuzzy_cutoff: Similarity threshold (0 to 1) for a match to be considered valid
     """
+
     def __init__(self, fuzzy_cutoff=0.6):
         self.fuzzy_cutoff = fuzzy_cutoff
 

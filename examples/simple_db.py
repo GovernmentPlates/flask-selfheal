@@ -1,4 +1,4 @@
-from flask import Flask, abort
+from flask import Flask, abort, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_selfheal import SelfHeal
 from flask_selfheal.resolvers import DatabaseResolver, AliasMappingResolver
@@ -24,28 +24,14 @@ with app.app_context():
 
 @app.route("/")
 def index():
-    return """
-    <h2>Examples with Alias Mapping & (Simple) Database Resolver</h2>
-    <hr/>
-    <p>Try these links:</p>
-    <ul>
-        <li><a href="/articles/self-healing-urls">Exact match</a></li>
-        <li><a href="/articles/self-healing-url">Close match (missing 's')</a></li>
-        <li><a href="/articles/flask-basic">Alias (flask-basic -> flask-basics)</a></li>
-        <li><a href="/articles/flask-basics">Direct link</a></li>
-        <li><a href="/articles/cool-product">Partial match</a></li>
-        <li><a href="/articles/phone-xyz123">Phone match</a></li>
-        <li><a href="/articles/super-phone">Partial phone match</a></li>
-    </ul>
-    <p>Check out <code>examples/simple_db.py</code> to see how it works!</p>
-    """
+    return render_template("simple_db/index.html")
 
 
 @app.route("/articles/<slug>")
 def by_slug(slug):
     article = Article.query.filter_by(slug=slug).first()
     if article:
-        return f"Article: {article.slug}"
+        return render_template("simple_db/article.html", slug=article.slug)
     abort(404)
 
 

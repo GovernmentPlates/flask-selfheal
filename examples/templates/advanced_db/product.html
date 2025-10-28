@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name }}</title>
+</head>
+<body>
+    <h1>{{ product.name }}</h1>
+    <p>Slug: {{ product.slug }}</p>
+    <p>Price: {{ product.price }} CHF</p>
+    <hr/>
+    <p><i>Return back to the <a href="{{ url_for('products') }}">frontpage</a>.</i></p>
+</body>
+</html>

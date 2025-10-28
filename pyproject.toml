@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flask-selfheal"
-version = "1.0.0"
+version = "1.1.0"
 description = "Self-healing URLs for Flask applications with intelligent resolvers"
 authors = [{ name = "Dominic H.", email = "dom@dominic.sk" }]
 readme = "README.md"

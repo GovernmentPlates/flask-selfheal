@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced DB Example</title>
+</head>
+<body>
+    <h2>Advanced URL healing examples</h2>
+    <hr/>
+    <p>You can configure the <code>DatabaseResolver</code> with options to control the fuzzy threshold, typo
+    checks and more. As well as define custom logic in the <code>SelfHeal</code> subclass to extract slugs from complex paths.</p>
+    <p>In this example, we handle paths like <code>/product/&lt;slug&gt;</code> and try to resolve <code>&lt;slug&gt;</code>
+    using various strategies.</p>
+    <p>Check out <code>examples/advanced_db.py</code> to see how it works!</p>
+    <p>In the meantime, try these links:</p>
+    <ul>
+        <li><a href="/product/cool-product-SKU1234567">Exact match</a></li>
+        <li><a href="/product/cool-pr0duct-SKU1234567">With typo (0 instead of o)</a></li>
+        <li><a href="/product/cool-SKU1234567">Partial match I</a></li>
+        <li><a href="/product/product-SKU1234567">Partial match II</a></li>
+        <li><a href="/product/SKU1234567">Just the SKU</a></li>
+        <li><a href="/product/cool-prodcut-SKU1234567">Transposed letters ('prodcut' instead of 'product')</a></li>
+        <li><a href="/product/awesome-ABC987654">Different product</a></li>
+        <li><a href="/product/phone-xyz123">Phone variation</a></li>
+    </ul>
+    <p>You can also see all the products in the demo database here:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>slug</th>
+                <th>name</th>
+                <th>price (CHF)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in products %}
+            <tr>
+                <td><a href="/product/{{ p.slug }}">{{ p.slug }}</a></td>
+                <td>{{ p.name }}</td>
+                <td>{{ p.price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

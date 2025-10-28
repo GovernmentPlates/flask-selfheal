@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_selfheal import SelfHeal
 from flask_selfheal.resolvers import DatabaseResolver
@@ -77,59 +77,18 @@ selfheal = ProductSelfHeal(app, resolvers=[product_resolver])
 @app.route("/product/<slug>")
 def product_detail(slug):
     product = Product.query.filter_by(slug=slug).first_or_404()
-    return f"""
-    <h1>{product.name}</h1>
-    <p>Slug: {product.slug}</p>
-    <p>Price: {product.price} CHF</p>
-    <hr/>
-    <p><i>Return back to the <a href="{url_for("search")}">frontpage</a>.</i></p>
-    """
-    # ^ Never ever do this in a real app - this is just for demo purposes
-    # (look up "SSTI" if you are curious, and more importantly, use templates!)
+    return render_template("advanced_db/product.html", product=product)
 
 
-@app.route("/search")
-def search():
+@app.route("/products")
+def products():
     products = Product.query.all()
-    return f"""
-    <h2>Advanced URL healing examples</h2>
-    <hr/>
-    <p>You can configure the <code>DatabaseResolver</code> with options to control the fuzzy threshold, typo 
-    checks and more. As well as define custom logic in the <code>SelfHeal</code> subclass to extract slugs from complex paths.</p>
-    <p>In this example, we handle paths like <code>/product/&lt;slug&gt;</code> and try to resolve <code>&lt;slug&gt;</code> 
-    using various strategies.</p>
-    <p>Check out <code>examples/advanced_db.py</code> to see how it works!</p>
-    <p>In the meantime, try these links or test your own variations below:</p>
-    <ul>
-        <li><a href="/product/cool-product-SKU1234567">Exact match</a></li>
-        <li><a href="/product/cool-pr0duct-SKU1234567">With typo (0 instead of o)</a></li>
-        <li><a href="/product/cool-SKU1234567">Partial match I</a></li>
-        <li><a href="/product/product-SKU1234567">Partial match II</a></li>
-        <li><a href="/product/SKU1234567">Just the SKU</a></li>
-        <li><a href="/product/cool-prodcut-SKU1234567">Transposed letters ('prodcut' instead of 'product')</a></li>
-        <li><a href="/product/awesome-ABC987654">Different product</a></li>
-        <li><a href="/product/phone-xyz123">Phone variation</a></li>
-    </ul>
-    <form method="GET" action="/product/">
-        <input type="text" name="test" placeholder="Enter any product variation" style="width: 200px;"/>
-        <button type="submit">Test Resolver</button>
-    </form>
-    <p>You can also see all the products in the demo database here:</p>
-    <table>
-        <thead>
-            <tr><th>slug</th><th>name</th><th>price (CHF)</th></tr>
-        </thead>
-        <tbody>
-            {"".join(f'<tr><td><a href="/product/{p.slug}">{p.slug}</a></td><td>{p.name}</td><td>{p.price}</td></tr>' for p in products)}
-        </tbody>
-    </table>
-    """
-    # ^ Also never do this in your real app - this is just for demo purposes and I'm lazy :)
+    return render_template("advanced_db/search.html", products=products)
 
 
 @app.route("/")
 def index():
-    return redirect(url_for("search"))
+    return redirect(url_for("products"))
 
 
 if __name__ == "__main__":
