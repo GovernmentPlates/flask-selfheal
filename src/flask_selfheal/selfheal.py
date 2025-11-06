@@ -42,4 +42,7 @@ class SelfHeal:
                     redirect_url = self.redirect_pattern.format(slug=target)
                     return redirect(redirect_url, code=301)
 
-        return f"404 Not Found: {path}", 404 # Maybe make this configurable (custom page)?
+        return (
+            f"404 Not Found: {path}",
+            404,
+        )  # Maybe make this configurable (custom page)?

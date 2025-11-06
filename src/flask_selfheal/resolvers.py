@@ -50,8 +50,9 @@ class DatabaseResolver(BaseResolver):
     """Database-backed resolver with fuzzy-like matching
 
     Resolves slugs by querying a SQLAlchemy model. This will try multiple
-    strategies in the following order: exact match, `LIKE` patterns,
-    word-based matching, partial matching, and finally fuzzy matching.
+    strategies in the following order: exact match, `LIKE` wildcards
+    (via :func:`.contains()`), word-based matching, partial matching,
+    and finally fuzzy matching.
 
     You will need to ensure that the model and `slug_field` are correctly set up
     to match your database schema.

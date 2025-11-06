@@ -150,7 +150,7 @@ https://example.com/articles/world        --> Redirects to /articles/hello-world
 
 The `DatabaseResolver` follows these strategies in order when trying to find a matching slug:
 1. **Exact match:** Fastest, direct database lookup
-2. **SQL `LIKE` patterns:** `%pattern%`, `pattern%`, `%pattern`
+2. **SQL `LIKE` matching:** Handle simple variations using SQL `LIKE` wildcards
 3. **Normalized matching:** Handle common typos (`0 -> o`, `1 -> l`, etc.)
 4. **Word-based matching:** Match individual significant words
 5. **Partial matching:** Match meaningful substrings
@@ -176,7 +176,7 @@ resolver = DatabaseResolver(
 )
 ```
 
-You can take a look at more examples in the `examples/` directory.
+You can take a look at more examples in the `examples/` directory
 
 
 ## License
