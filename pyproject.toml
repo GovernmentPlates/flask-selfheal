@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flask-selfheal"
-version = "1.1.1"
+version = "1.1.2"
 description = "Self-healing URLs for Flask applications with intelligent resolvers"
 authors = [{ name = "Dominic H.", email = "dom@dominic.sk" }]
 readme = "README.md"
@@ -21,17 +21,17 @@ dependencies = [
     "flask-sqlalchemy>=3.1",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+
 [project.urls]
 Homepage = "https://github.com/GovernmentPlates/flask-selfheal"
 Repository = "https://github.com/GovernmentPlates/flask-selfheal.git"
 Issues = "https://github.com/GovernmentPlates/flask-selfheal/issues"
 Documentation = "https://github.com/GovernmentPlates/flask-selfheal#readme"
-
-[dependency-groups]
-dev = [
-    "pytest",
-    "ruff",
-]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
